@@ -18,3 +18,4 @@ alias grep="grep -n --color"
 alias rm="rm -i"
 alias psu="ps -U $USER"
 alias enscript="enscript -2rE"
+[ -f $HOME/scripts/set_env_local.sh ] && source $HOME/scripts/set_env_local.sh
