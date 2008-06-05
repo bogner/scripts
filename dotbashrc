@@ -72,8 +72,8 @@ alias enscript="enscript -2rE"
 alias lpr="lpr -h"
 alias vncviewer='vncviewer -shared'
 
-export EDITOR="emacs -nw"
-export PAGER="less -F"
+export EDITOR="emacsclient -t"
+export PAGER="less -FX"
 
 # we want to know our fortune
-which fortune >/dev/null && fortune
+which fortune 2>/dev/null >/dev/null && fortune
