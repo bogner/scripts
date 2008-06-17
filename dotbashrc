@@ -62,7 +62,8 @@ stty -ixon
 
 
 # Enable colors for ls, etc.
-eval `dircolors -b`
+[ -e ~/.dir_colors ] || dircolors -p >~/.dir_colors
+eval `dircolors -b ~/.dir_colors`
 # Alias definitions.
 alias ls="ls --color=auto"
 alias ll="ls -l"
