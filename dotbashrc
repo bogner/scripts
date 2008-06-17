@@ -1,6 +1,8 @@
 #!/bin/bash
 
-function prepend_path() {
+### This top part should be POSIX sh compatible, so that we can source
+### it non-interactively and get our path
+prepend_path () {
   old_ifs="$IFS"
   IFS=:
   while [ -n "$1" ]; do
@@ -15,9 +17,10 @@ function prepend_path() {
 prepend_path $HOME/local/bin $HOME/scripts
 
 
-# If not running interactively, don't do anything else
-[ -z "$PS1" ] && return
+# Only continue if we're interactively running bash
+[ -z "$PS1" ] || [ "$0" != "bash" ] && return
 
+### end of POSIX compatibility
 
 # don't put duplicate lines in the history. See bash(1) for more options
 export HISTCONTROL=ignoredups
@@ -43,7 +46,7 @@ else
     PS1="${COL2}\u@\h${COL1} \w \$${NC} "
 fi
 unset COL0 COL1 COL2 NC
-# Change the window title of X terminals 
+# Change the window title of X terminals
 case $TERM in
     xterm*|rxvt*|Eterm)
 	PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME%%.*}:${PWD/$HOME/~}\007"'
