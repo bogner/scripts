@@ -18,7 +18,7 @@ prepend_path $HOME/local/bin $HOME/scripts
 
 
 # Only continue if we're interactively running bash
-[ -z "$PS1" ] || [ "$0" != "bash" ] && return
+[ -z "$PS1" ] || [ $(ps -p $$ -o comm=) != "bash" ] && return
 
 ### end of POSIX compatibility
 
