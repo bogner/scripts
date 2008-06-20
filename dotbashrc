@@ -2,6 +2,8 @@
 
 ### This top part should be POSIX sh compatible, so that we can source
 ### it non-interactively and get our path
+shell="$(ps -p $$ -o comm= | sed 's/^-//')"
+
 prepend_path () {
   old_ifs="$IFS"
   IFS=:
@@ -18,7 +20,7 @@ prepend_path $HOME/local/bin $HOME/scripts
 
 
 # Only continue if we're interactively running bash
-[ -z "$PS1" ] || [ $(ps -p $$ -o comm=) != "bash" ] && return
+[ -z "$PS1" ] || [ "$shell" != "bash" ] && return
 
 ### end of POSIX compatibility
 
