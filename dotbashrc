@@ -81,5 +81,11 @@ alias vncviewer='vncviewer -shared'
 export EDITOR="emacsclient -t"
 export PAGER="less -FX"
 
+# some machines lack urxvt-unicode in their terminfo db, so we bring
+# our own db
+[ -d ~/.terminfo ] && export TERMINFO=~/.terminfo
+# similarly, some boxes have archaic programs which still use termcap
+export TERMCAP=$(infocmp -C 2>/dev/null | sed '/^#/d')
+
 # we want to know our fortune
 which fortune 2>/dev/null >/dev/null && fortune
