@@ -60,14 +60,14 @@ shorten () {
     local result=$1
     [[ $result == $HOME* ]] && result="~${result#$HOME}"
     local offset=$(( ${#result} - $max + 3 ))
-    [ $offset -gt 0 ] && result="...${result:$offset:$max}"
+    [ $offset -gt 0 ] && result="...$(echo ${result:$offset:$max} | sed 's/[^/]*//')"
     echo $result
 }
 
 _user="${c_user}\u"
 _host="${c_host}@\h"
 _jobs="${c_yellow}"'$(jobcount)'
-_cwd="${c_blue}"'$(shorten \w)'
+_cwd='$([ -w $PWD ]'" && echo '$c_blue' || echo '$c_red')"'$(shorten \w)'
 _prompt=" ${c_blue}\$ ${c_nc}"
 
 PS1="${_user}${_host}${_jobs}${_cwd}${_prompt}"
