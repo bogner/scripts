@@ -36,25 +36,51 @@ case $TERM in
     dumb)
         ;;
     *)
-        COL0='\[\e[0;31m\]' # green
-        COL1='\[\e[0;34m\]' # blue
-        COL2='\[\e[0;32m\]' # red
-        NC='\[\e[0m\]'
+        c_yellow='\[\e[0;33m\]'
+        c_green='\[\e[0;32m\]'
+        c_brightgreen='\[\e[1;32m\]'
+        c_blue='\[\e[0;34m\]'
+        c_red='\[\e[0;31m\]'
+        c_nc='\[\e[0m\]'
         ;;
 esac
-if [[ ${EUID} == 0 ]] ; then
-    PS1="${COL0}\h${COL1} \W \$${NC} "
-else
-    PS1="${COL2}\u@\h${COL1} \w \$${NC} "
-fi
-unset COL0 COL1 COL2 NC
+
+[ $EUID = 0 ] && c_user=$c_red || c_user=$c_green
+[ "$SSH_CLIENT" ] && c_host=$c_brightgreen || c_host=$c_green
+
+jobcount () {
+    local stopped=$(jobs -s | wc -l)
+    local result=" "
+    [ $stopped -gt 0 ] && result="$result($stopped) "
+    echo "$result"
+}
+
+shorten () {
+    local max=$(($COLUMNS/4))
+    local result=$1
+    [[ $result == $HOME* ]] && result="~${result#$HOME}"
+    local offset=$(( ${#result} - $max + 3 ))
+    [ $offset -gt 0 ] && result="...${result:$offset:$max}"
+    echo $result
+}
+
+_user="${c_user}\u"
+_host="${c_host}@\h"
+_jobs="${c_yellow}"'$(jobcount)'
+_cwd="${c_blue}"'$(shorten \w)'
+_prompt=" ${c_blue}\$ ${c_nc}"
+
+PS1="${_user}${_host}${_jobs}${_cwd}${_prompt}"
+
+unset c_yellow c_green c_brightgreen c_blue c_red c_nc _user _host _cwd _prompt
+
 # Change the window title of X terminals
 case $TERM in
-    xterm*|rxvt*|Eterm)
-        PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME%%.*}:${PWD/$HOME/~}\007"'
+    xterm*|rxvt*)
+        PROMPT_COMMAND='echo -ne "\033]0;${PWD/$HOME\//~/} ($TERM)\007"'
         ;;
     screen)
-        PROMPT_COMMAND='echo -ne "\033_${USER}@${HOSTNAME%%.*}:${PWD/$HOME/~}\033\\"'
+        PROMPT_COMMAND='echo -ne "\033_${PWD/$HOME\//~/} ($TERM)\033\\"'
         ;;
 esac
 # disable XON/XOFF (c-s should search, not pause)
