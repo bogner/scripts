@@ -92,12 +92,18 @@ stty -ixon
 # Enable colors for ls, etc.
 [ -e ~/.dir_colors ] || dircolors -p >~/.dir_colors
 eval `dircolors -b ~/.dir_colors`
+
+isgnu () {
+    [[ "$($1 --version 2>/dev/null | head)" == *GNU* ]] && return 0
+    return 1
+}
+
 # Alias definitions.
-alias ls="ls --color=auto"
+isgnu ls && alias ls="ls --color=auto" || alias ls="ls -F"
 alias ll="ls -l"
 alias la="ls -A"
 alias l="ls -Al"
-alias grep="grep --color"
+isgnu grep && alias grep="grep --color=auto"
 alias rm="rm -i"
 alias psu="ps -U $USER"
 alias enscript="enscript -2rE"
