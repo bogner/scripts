@@ -36,9 +36,9 @@ case $TERM in
     dumb)
         ;;
     *)
+        c_bright='\[\e[1m\]'
         c_yellow='\[\e[0;33m\]'
         c_green='\[\e[0;32m\]'
-        c_brightgreen='\[\e[1;32m\]'
         c_blue='\[\e[0;34m\]'
         c_red='\[\e[0;31m\]'
         c_nc='\[\e[0m\]'
@@ -46,16 +46,16 @@ case $TERM in
 esac
 
 [ $EUID = 0 ] && c_user=$c_red || c_user=$c_green
-[ "$SSH_CLIENT" ] && c_host=$c_brightgreen || c_host=$c_green
+[ "$SSH_CLIENT" ] && c_host=$c_green$c_bright || c_host=$c_green
 
-jobcount () {
+__jobcount () {
     local stopped=$(jobs -s | wc -l)
     local result=" "
     [ $stopped -gt 0 ] && result="$result($stopped) "
     echo "$result"
 }
 
-shorten () {
+__shorten () {
     local max=$(($COLUMNS/4))
     local result=$1
     [[ $result == $HOME* ]] && result="~${result#$HOME}"
@@ -66,8 +66,8 @@ shorten () {
 
 _user="${c_user}\u"
 _host="${c_host}@\h"
-_jobs="${c_yellow}"'$(jobcount)'
-_cwd='$([ -w $PWD ]'" && echo '$c_blue' || echo '$c_red')"'$(shorten \w)'
+_jobs="${c_yellow}"'$(__jobcount)'
+_cwd='$([ -w $PWD ]'" && echo '$c_blue' || echo '$c_red')"'$(__shorten \w)'
 _prompt=" ${c_blue}\$ ${c_nc}"
 
 PS1="${_user}${_host}${_jobs}${_cwd}${_prompt}"
