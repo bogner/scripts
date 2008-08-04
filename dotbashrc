@@ -87,7 +87,7 @@ esac
 stty -ixon
 # programmable completion
 [ -f /etc/bash_completion ] && . /etc/bash_completion
-
+bind "set show-all-if-unmodified on"
 
 # Enable colors for ls, etc.
 [ -e ~/.dir_colors ] || dircolors -p >~/.dir_colors
