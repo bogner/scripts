@@ -87,6 +87,7 @@ esac
 stty -ixon
 # programmable completion
 [ -f /etc/bash_completion ] && . /etc/bash_completion
+bind "set bell-style none"
 bind "set show-all-if-unmodified on"
 
 # Enable colors for ls, etc.
