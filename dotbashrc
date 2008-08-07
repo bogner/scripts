@@ -68,7 +68,7 @@ _user="${c_user}\u"
 _host="${c_host}@\h"
 _jobs="${c_yellow}"'$(__jobcount)'
 _cwd='$([ -w $PWD ]'" && echo '$c_blue' || echo '$c_red')"'$(__shorten \w)'
-_prompt=" ${c_blue}\$ ${c_nc}"
+_prompt=" ${c_blue}"'\$'" ${c_nc}"
 
 PS1="${_user}${_host}${_jobs}${_cwd}${_prompt}"
 
