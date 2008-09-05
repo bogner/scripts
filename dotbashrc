@@ -111,7 +111,7 @@ alias enscript="enscript -2rE"
 alias lpr="lpr -h"
 alias vncviewer='vncviewer -shared'
 
-export EDITOR="emacsclient -t"
+export EDITOR="emacsclient -t -a emacs"
 export PAGER="less -FX"
 
 # some machines lack urxvt-unicode in their terminfo db, so we bring
