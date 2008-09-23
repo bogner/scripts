@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# Update cvs every time master is updated
+
+cvs_wd=/path/to/cvs
+recipients=""
+
+for i in $@; do
+    echo "Subject: CVS Update"
+    if [ x$i = x"refs/heads/master" ]; then
+        git-cherry cvshead master | \
+            sed -n ´s/^+ //p´ | \
+            xargs -l1 git-cvsexportcommit -c -p -v -w $cvs_wd
+    fi
+done | sendmail $recipients
