@@ -1,15 +1,19 @@
 #!/bin/sh
 #
-# Update cvs every time master is updated
+# Update cvs every time master is updated.
+# For this to work, make sure an initial commit is in CVS and that
+# refs/heads/cvshead has it's SHA1 sum.
 
-cvs_wd=/path/to/cvs
+cvs_wd=/path/to/cvs/checkout
 recipients=""
 
 for i in $@; do
-    echo "Subject: CVS Update"
     if [ x$i = x"refs/heads/master" ]; then
+        echo "Subject: CVS Update"
         git-cherry cvshead master | \
             sed -n ´s/^+ //p´ | \
-            xargs -l1 git-cvsexportcommit -c -p -v -w $cvs_wd
+            xargs -l1 git-cvsexportcommit -a -c -p -v -w $cvs_wd
+
+        cp refs/heads/master refs/heads/cvshead
     fi
 done | sendmail $recipients
