@@ -112,7 +112,9 @@ alias lpr="lpr -h"
 alias vncviewer='vncviewer -shared'
 
 export EDITOR="emacsclient -t -a emacs"
-export PAGER="less -FX"
+export VISUAL=$EDITOR
+export PAGER="less"
+export LESS="-FRX"
 
 # some machines lack rxvt-unicode in their terminfo db, so we bring
 # our own db
