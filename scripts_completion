@@ -1,1 +1,13 @@
 complete -F _scp $nospace sless.sh
+
+_dtattach () {
+    local cur sockdir sockcur
+
+    cur=$2
+    _expand || return 0
+
+    sockdir=$(find ~/.dtach -maxdepth 1 -type s -printf '%f ') 2>/dev/null
+    sockcur=$(find $(compgen -f $cur) -maxdepth 0 -type s 2>/dev/null)
+    COMPREPLY=( $( compgen -W "$sockdir $sockcur" -- "$2" ) )
+}
+complete -o plusdirs -F _dtattach dtattach.sh

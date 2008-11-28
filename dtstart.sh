@@ -1,5 +1,5 @@
 #!/bin/bash
-# create a dtach session with the given name
+# create a group readable dtach session with the given name
 usage="$0 socket_prefix"
 
 function die() {
