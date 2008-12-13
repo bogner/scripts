@@ -57,7 +57,7 @@ __jobcount () {
 
 __shorten () {
     local max=$(($COLUMNS/4))
-    local result=$1
+    local result="$@"
     [[ $result == $HOME* ]] && result="~${result#$HOME}"
     local offset=$(( ${#result} - $max + 3 ))
     [ $offset -gt 0 ] && result="...$(echo ${result:$offset:$max} | sed 's/[^/]*//')"
@@ -67,7 +67,7 @@ __shorten () {
 _user="${c_user}\u"
 _host="${c_host}@\h"
 _jobs="${c_yellow}"'$(__jobcount)'
-_cwd='$([ -w $PWD ]'" && echo '$c_blue' || echo '$c_red')"'$(__shorten \w)'
+_cwd='$([ -w "$PWD" ]'" && echo '$c_blue' || echo '$c_red')"'$(__shorten \w)'
 _prompt=" ${c_blue}"'\$'" ${c_nc}"
 
 PS1="${_user}${_host}${_jobs}${_cwd}${_prompt}"
