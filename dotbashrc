@@ -86,7 +86,8 @@ esac
 # disable XON/XOFF (c-s should search, not pause)
 stty -ixon
 # programmable completion
-[ -f /etc/bash_completion ] && . /etc/bash_completion
+([ -r /etc/bash_completion ] && . /etc/bash_completion) || \
+    ([ -r ~/.bash_completion ] && . ~/.bash_completion)
 
 # readline behaviour
 bind "set bell-style none"
