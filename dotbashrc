@@ -2,7 +2,7 @@
 
 ### This top part should be POSIX sh compatible, so that we can source
 ### it non-interactively and get our path
-shell="$(ps -p $$ -o comm= | sed 's/^-//')"
+shell="$(ps -p $$ -o comm | sed '1d; s/^-//; s/ *$//')"
 
 prepend_path () {
   old_ifs="$IFS"
@@ -97,9 +97,11 @@ bind "set bell-style none"
 bind "set show-all-if-unmodified on"
 bind "set visible-stats on"
 
-# Enable colors for ls, etc.
-[ -e ~/.dir_colors ] || dircolors -p >~/.dir_colors
-eval `dircolors -b ~/.dir_colors`
+if which dircolors >/dev/null; then
+    # Enable colors for ls, etc.
+    [ -e ~/.dir_colors ] || dircolors -p >~/.dir_colors
+    eval `dircolors -b ~/.dir_colors`
+fi
 
 isgnu () {
     [[ "$($1 --version 2>/dev/null | head)" == *GNU* ]] && return 0
