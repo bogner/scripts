@@ -1,0 +1,6 @@
+#!/bin/bash
+
+to=""
+[ $# -ge 1 ] && to="$(echo "${@#mailto:}" | sed 's/%20/ /g')"
+
+emacsclient -e "(progn (x-focus-frame nil) (compose-mail \"$to\"))"
