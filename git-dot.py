@@ -84,11 +84,15 @@ class TestGitToDot(unittest.TestCase):
         self.generator.generate()
         self.assert_(self.output.isDotFormat())
 
-    def testOneCommit(self):
-        self.gitLog.addCommit()
+    def testSeveralNodes(self, n = 100):
+        for _ in range(n):
+            self.gitLog.addCommit()
         self.generator.generate()
         self.assert_(self.output.isDotFormat())
-        self.assertEqual(1, self.output.getNumberOfNodes())
+        self.assertEqual(n, self.output.getNumberOfNodes())
+
+    def testOneNode(self):
+        self.testSeveralNodes(n = 1)
 
     def tearDown(self):
         self.output.close()
