@@ -74,9 +74,24 @@ class GraphGenerator:
     def _writeFooter(self):
         self._writeLine('}')
 
-class FakeGitLog:
-    def getLogStream(self, format):
-        return StringIO()
+class TestGitToDot(unittest.TestCase):
+    def setUp(self):
+        self.output = FakeDotOutput()
+        self.gitLog = FakeGitLog()
+        self.generator = GraphGenerator(self.output, self.gitLog)
+
+    def testNoCommits(self):
+        self.generator.generate()
+        self.assert_(self.output.isDotFormat())
+
+    def testOneCommit(self):
+        self.gitLog.addCommit()
+        self.generator.generate()
+        self.assert_(self.output.isDotFormat())
+        self.assertEqual(1, self.output.getNumberOfNodes())
+
+    def tearDown(self):
+        self.output.close()
 
 class FakeDotOutput(StringIO):
     def isDotFormat(self):
@@ -93,18 +108,20 @@ class FakeDotOutput(StringIO):
     def _findall(self, pattern):
         return re.findall(pattern, self.getvalue())
 
-class TestGitToDot(unittest.TestCase):
-    def setUp(self):
-        self.output = FakeDotOutput()
-        self.gitLog = FakeGitLog()
-        self.generator = GraphGenerator(self.output, self.gitLog)
+class FakeGitLog:
+    def __init__(self):
+        self._commits = []
 
-    def testNoCommits(self):
-        self.generator.generate()
-        self.assert_(self.output.isDotFormat(), self.output.getvalue())
+    def addCommit(self):
+        self._commits.append(FakeCommit())
 
-    def tearDown(self):
-        self.output.close()
+    def getLogStream(self, format):
+        lines = [str(commit) for commit in self._commits]
+        return StringIO('\n'.join(lines))
+
+class FakeCommit:
+    def __str__(self):
+        return chr(FIELD_SEPARATOR).join(['0', '', ''])
 
 if __name__ == '__main__':
     main(sys.argv)
