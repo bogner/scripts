@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-import csv, sys, unittest
+import csv, re, sys, unittest
+from StringIO import StringIO
 from subprocess import Popen, PIPE
 
 ASCII_UNIT_SEPARATOR = 0x1f
@@ -72,6 +73,38 @@ class GraphGenerator:
 
     def _writeFooter(self):
         self._writeLine('}')
+
+class FakeGitLog:
+    def getLogStream(self, format):
+        return StringIO()
+
+class FakeDotOutput(StringIO):
+    def isDotFormat(self):
+        match = self._search('^\s*digraph \w+ {(.|\n)*}\s*$')
+        return match is not None
+
+    def _search(self, pattern):
+        return re.search(pattern, self.getvalue())
+
+    def getNumberOfNodes(self):
+        nodes = self._findall('"\d+"( \[[^]]+\])?;')
+        return len(nodes)
+
+    def _findall(self, pattern):
+        return re.findall(pattern, self.getvalue())
+
+class TestGitToDot(unittest.TestCase):
+    def setUp(self):
+        self.output = FakeDotOutput()
+        self.gitLog = FakeGitLog()
+        self.generator = GraphGenerator(self.output, self.gitLog)
+
+    def testNoCommits(self):
+        self.generator.generate()
+        self.assert_(self.output.isDotFormat(), self.output.getvalue())
+
+    def tearDown(self):
+        self.output.close()
 
 if __name__ == '__main__':
     main(sys.argv)
