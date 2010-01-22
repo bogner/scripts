@@ -68,7 +68,9 @@ class GraphGenerator:
                             break
             if not label:
                 label = sha1
-            line = '"%s" [label="%s"];%s;' % (sha1, label, ';'.join(edges))
+
+            line = '"%s" [label="%s"];%s' % (sha1, label,
+                                             ';'.join(edges + ['']))
             self._writeLine(line)
 
     def _writeFooter(self):
@@ -88,26 +90,65 @@ class TestGitToDot(unittest.TestCase):
         for _ in range(n):
             self.gitLog.addCommit()
         self.generator.generate()
-        self.assert_(self.output.isDotFormat())
         self.assertEqual(n, self.output.getNumberOfNodes())
+        self.assertEqual(0, self.output.getNumberOfEdges())
 
     def testOneNode(self):
         self.testSeveralNodes(n = 1)
+
+    def testOneEdge(self):
+        commit1 = self.gitLog.addCommit()
+        commit2 = self.gitLog.addCommit()
+        self.gitLog.addCommit(parents = [commit1, commit2])
+
+        self.generator.generate()
+        self.assertEqual(3, self.output.getNumberOfNodes())
+        self.assertEqual(2, self.output.getNumberOfEdges())
+
+    def testTag(self):
+        self.gitLog.addCommit(refNames = ['refs/tags/foo'])
+        self.generator.generate()
+        self.assertEqual(1, self.output.getNumberOfNodes())
+        self.assertEqual('foo', self.output.getLabelOfNode(0))
+
+    def testHeadAndRemote(self):
+        self.gitLog.addCommit(refNames = ['refs/remotes/origin/foo',
+                                          'refs/heads/bar'])
+        self.generator.generate()
+        self.assertEqual(1, self.output.getNumberOfNodes())
+        self.assertEqual('bar', self.output.getLabelOfNode(0))
+
 
     def tearDown(self):
         self.output.close()
 
 class FakeDotOutput(StringIO):
+    dotRegex = '^\s*digraph \w+ {(.|\n)*}\s*$'
+    nodeRegex = '(?<=[{;])\s*"\d+"(?: \[[^]]+\])?(?=;)'
+    edgeRegex = '(?<=[{;])\s*"\d+"->"\d+"(?: \[[^]]+\])?(?=;)'
+
     def isDotFormat(self):
-        match = self._search('^\s*digraph \w+ {(.|\n)*}\s*$')
+        match = self._search(self.dotRegex)
         return match is not None
 
     def _search(self, pattern):
         return re.search(pattern, self.getvalue())
 
     def getNumberOfNodes(self):
-        nodes = self._findall('"\d+"( \[[^]]+\])?;')
+        nodes = self._findall(self.nodeRegex)
         return len(nodes)
+
+    def getNumberOfEdges(self):
+        edges = self._findall(self.edgeRegex)
+        return len(edges)
+
+    def getLabelOfNode(self, index):
+        nodes = self._findall(self.nodeRegex)
+        labels = []
+        for node in nodes:
+            match = re.search('label="([^"]+)"', node)
+            labels.append(match.group(1) or None)
+        return labels[index]
 
     def _findall(self, pattern):
         return re.findall(pattern, self.getvalue())
@@ -116,16 +157,28 @@ class FakeGitLog:
     def __init__(self):
         self._commits = []
 
-    def addCommit(self):
-        self._commits.append(FakeCommit())
+    def addCommit(self, parents = (), refNames = ()):
+        nextId = len(self._commits)
+        commit = FakeCommit(nextId, parents, refNames)
+        self._commits.append(commit)
+        return commit
 
     def getLogStream(self, format):
         lines = [str(commit) for commit in self._commits]
         return StringIO('\n'.join(lines))
 
 class FakeCommit:
+    def __init__(self, commitId, parents, refNames):
+        self.commitId = commitId
+        self.parentIds = [p.commitId for p in parents]
+        self.refNames = refNames
+
     def __str__(self):
-        return chr(FIELD_SEPARATOR).join(['0', '', ''])
+        commitId = str(self.commitId)
+        parentIds = ' '.join([str(i) for i in self.parentIds])
+        refNames = ' (%s)' % ', '.join([str(i) for i in self.refNames])
+        fields = [commitId, parentIds, refNames]
+        return chr(FIELD_SEPARATOR).join(fields)
 
 if __name__ == '__main__':
     main(sys.argv)
