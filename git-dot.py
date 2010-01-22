@@ -19,6 +19,17 @@ class GitLog:
         proc = Popen(command, stdout = PIPE)
         return proc.stdout
 
+class LogEntry:
+    def __init__(self, sha1, parents, refnames):
+        self.sha1 = sha1
+        self.parents = parents
+        self.refnames = refnames
+
+class Edge:
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+
 class GraphGenerator:
     def __init__(self, outputStream, gitLog):
         self.output = outputStream
@@ -36,42 +47,83 @@ class GraphGenerator:
         self.output.write(line + '\n')
 
     def _writeBody(self):
+        logStream = self._getLogStream()
+        for entry in self._readLog(logStream):
+            nodeId = self._getNodeId(entry)
+            label = self._getLabel(entry)
+            edges = self._getEdges(entry)
+            line = self._formatLine(nodeId, label, edges)
+            self._writeLine(line)
+
+    def _getLogStream(self):
         sep = '%x' % FIELD_SEPARATOR
         logFormat = ('%x' + sep).join(['%h', '%p', '%d'])
-        stream = self.gitLog.getLogStream(logFormat)
+        return self.gitLog.getLogStream(logFormat)
+
+    def _readLog(self, stream):
         reader = csv.reader(stream, delimiter = chr(FIELD_SEPARATOR))
-        for sha1, parents, refnames in reader:
-            edges = ['"%s"->"%s"' % (parent, sha1)
-                     for parent in parents.split()]
+        for sha1, parents, edges in reader:
+            yield LogEntry(sha1, parents, edges)
 
-            label = None
-            refnames = refnames.strip()
-            if refnames:
-                if refnames[0] == '(':
-                    refnames = refnames[1:]
-                if refnames[-1] == ')':
-                    refnames = refnames[:-1]
+    def _getNodeId(self, entry):
+        return entry.sha1
 
-                names = refnames.split(', ')
-                if len(names) == 1:
-                    label = '/'.join(names[0].split('/')[2:])
-                elif len(names) > 1:
-                    namesByKind = {}
-                    for name in names:
-                        kind = name.split('/')[1]
-                        realname = '/'.join(name.split('/')[2:])
-                        namesByKind[kind] = realname
-                    keys = namesByKind.keys()
-                    for kind in ('tags', 'heads', 'remotes'):
-                        if kind in keys:
-                            label = namesByKind[kind]
-                            break
-            if not label:
-                label = sha1
+    def _getLabel(self, entry):
+        label = self._getLabelFromRefNames(entry.refnames)
+        if not label:
+            label = entry.sha1
+        return label
 
-            line = '"%s" [label="%s"];%s' % (sha1, label,
-                                             ';'.join(edges + ['']))
-            self._writeLine(line)
+    def _getLabelFromRefNames(self, refnames):
+        refnames = self._convertRefNameStringToList(refnames)
+        namesByKind = self._mapKindsToNames(refnames)
+        keys = namesByKind.keys()
+        for kind in ('tags', 'heads', 'remotes'):
+            if kind in keys:
+                return namesByKind[kind]
+        return None
+
+    def _mapKindsToNames(self, names):
+        namesByKind = {}
+        for name in names:
+            kind = name.split('/')[1]
+            realname = '/'.join(name.split('/')[2:])
+            namesByKind[kind] = realname
+        return namesByKind
+
+    def _convertRefNameStringToList(self, refnames):
+        refnames = refnames.strip()
+        if refnames:
+            refnames = self._deparenthesize(refnames)
+            return refnames.split(', ')
+        return []
+
+    def _deparenthesize(self, string):
+        if string[0] == '(' and string[-1] == ')':
+            return string[1:-1]
+        raise ValueError("String '%s' has no parens to remove" % string)
+
+    def _getEdges(self, entry):
+        parents = entry.parents.split()
+        return [Edge(parent, entry.sha1) for parent in parents]
+
+    def _formatLine(self, nodeId, label, edges):
+        node = self._formatNode(nodeId, label)
+        edges = self._formatEdges(edges)
+        return node + edges
+
+    def _formatNode(self, nodeId, label):
+        return '"%s" [label="%s"];' % (nodeId, label)
+
+    def _formatEdges(self, edges):
+        formattedEdges = [self._formatEdge(edge) for edge in edges]
+        result = ';'.join(formattedEdges)
+        if result is not '':
+            result += ';'
+        return result
+
+    def _formatEdge(self, edge):
+        return '"%s"->"%s"' % (edge.start, edge.end)
 
     def _writeFooter(self):
         self._writeLine('}')
@@ -117,7 +169,6 @@ class TestGitToDot(unittest.TestCase):
         self.generator.generate()
         self.assertEqual(1, self.output.getNumberOfNodes())
         self.assertEqual('bar', self.output.getLabelOfNode(0))
-
 
     def tearDown(self):
         self.output.close()
@@ -168,17 +219,30 @@ class FakeGitLog:
         return StringIO('\n'.join(lines))
 
 class FakeCommit:
+    _fieldSeparator = chr(FIELD_SEPARATOR)
+
     def __init__(self, commitId, parents, refNames):
         self.commitId = commitId
         self.parentIds = [p.commitId for p in parents]
         self.refNames = refNames
 
     def __str__(self):
-        commitId = str(self.commitId)
-        parentIds = ' '.join([str(i) for i in self.parentIds])
-        refNames = ' (%s)' % ', '.join([str(i) for i in self.refNames])
+        commitId = self._formatCommitId()
+        parentIds = self._formatParentIds()
+        refNames = self._formatRefNames()
         fields = [commitId, parentIds, refNames]
-        return chr(FIELD_SEPARATOR).join(fields)
+        return self._fieldSeparator.join(fields)
+
+    def _formatCommitId(self):
+        return str(self.commitId)
+
+    def _formatParentIds(self):
+        return ' '.join([str(i) for i in self.parentIds])
+
+    def _formatRefNames(self):
+        if 0 == len(self.refNames):
+            return ''
+        return ' (%s)' % ', '.join([str(i) for i in self.refNames])
 
 if __name__ == '__main__':
     main(sys.argv)
