@@ -1,0 +1,20 @@
+#!/bin/bash
+# I like my editor to strip trailing whitespace on save, but when I
+# edit sloppier people's code, this makes for big useless whitespace
+# diffs. This command reverts the whitespace corrections.
+
+GIT_DIR="$(git rev-parse --git-dir)"
+
+git diff -b > $GIT_DIR/WHITESPACE_PATCH
+git stash
+if git apply $GIT_DIR/WHITESPACE_PATCH; then
+    git stash drop
+    echo "Successfully restored whitespace problems."
+    rc=0
+else
+    git stash pop
+    echo "Failed to restore whitespace problems."
+    rc=1
+fi
+rm $GIT_DIR/WHITESPACE_PATCH
+exit $rc
