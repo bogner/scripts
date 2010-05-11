@@ -2,8 +2,8 @@
 
 /usr/bin/indent -nbad -bap -nbbb -nbbo -nbc -bli0 -br -brs -c33 -cbi0 -cd33 \
     -ncdb -cdw -ce -ci4 -cli0 -cp33 -ncs -d0 -nbfda -nbfde -di1 -nfc1 -nfca \
-    -nhnl -i2 -ip0 -l80 -lc80 -lp -nlps -npcs -pi1 -nprs -npsl -saf -sai -saw \
-    -sbi0 -nsc -nsob -nss -ts2 -nut "$@"
+    -nhnl -i4 -ip0 -l80 -lc80 -lp -nlps -npcs -pi1 -nprs -psl -saf -sai -saw \
+    -sbi0 -nsc -nsob -nss -ts4 -nut "$@"
 
 exit $?
 
@@ -57,7 +57,7 @@ exit $?
     Do not disable all formatting of comments.
 -nhnl
     Prefer  to  break  long  lines  at  the position of newlines in the input.
--i2
+-i4
     Set indentation level to n spaces.
 -ip0
     Indent parameter types  in  old-style  function  definitions  by n spaces.
@@ -75,7 +75,7 @@ exit $?
     Specify  the  extra  indentation  per  open  parentheses ’(’ when a statement is broken.
 -nprs
     Put a space after every ’(’ and before every ’)’.
--npsl
+-psl
     Put the type of a procedure on the line before its name.
 -saf
     Put a space after each for.
@@ -91,7 +91,7 @@ exit $?
     Swallow optional blank lines.
 -nss
     On one-line for and while statments, force a blank before the semicolon.
--ts2
+-ts4
     Set tab size to n spaces.
 -nut
     Use tabs. This is the default.
