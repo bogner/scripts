@@ -15,12 +15,31 @@ def main(argv):
 
 class Indicator:
     def __init__(self, name):
-        self.icon = gtk.StatusIcon()
+        self.icon = self.make_icon()
+        self.menu = self.make_menu()
+        self.state = self.make_fsm()
+
+    def make_icon(self):
+        icon = gtk.StatusIcon()
+        icon.connect("popup-menu", self.popup)
+        return icon
+
+    def make_menu(self):
+        menu = gtk.Menu()
+        items = [("Quit", self.quit)]
+        for label, method in items:
+            item = gtk.MenuItem(label)
+            item.connect("activate", method)
+            item.show()
+            menu.append(item)
+        return menu
+
+    def make_fsm(self):
         work = IndicatorState('Work for 25 minutes', 'pomodoro.png', time = 25)
         rest = IndicatorState('Take a short break', 'sleep.png', time = 5)
         work.next = rest
         rest.next = work
-        self.state = work
+        return work
 
     def run(self):
         self.transition()
@@ -42,7 +61,11 @@ class Indicator:
                                            self.state.remaining)
         self.icon.set_from_pixbuf(image)
 
-    def quit(self):
+    def popup(self, icon, button, activate_time):
+        self.menu.popup(None, None, gtk.status_icon_position_menu,
+                        button, activate_time, icon)
+
+    def quit(self, *args):
         gtk.main_quit()
 
 class IndicatorState:
