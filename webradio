@@ -20,6 +20,7 @@ def main(argv):
 class Radio(QtGui.QApplication):
     def __init__(self, argv):
         QtGui.QApplication.__init__(self, argv)
+
         self.window = QtGui.QMainWindow()
         self.quitOnLastWindowClosed = True
 
@@ -30,33 +31,68 @@ class Radio(QtGui.QApplication):
         settings = self.browser.settings()
         settings.setAttribute(QtWebKit.QWebSettings.PluginsEnabled, True)
 
+        self.station = Station(self.browser)
         QtGui.QShortcut("Ctrl+S", self.window, activated = self.choose_station)
 
-        self.stations = {"pandora": "http://www.pandora.com",
-                         "grooveshark": "http://grooveshark.com"}
-
     def choose_station(self):
-        stations = self.stations.keys()
+        stations = dict((s.__name__, s) for s in Station.__subclasses__())
         station, ok = QtGui.QInputDialog.getItem(self.window,
                                                  "Choose a station",
                                                  "Station:",
-                                                 stations,
+                                                 stations.keys(),
                                                  editable = False)
         if ok:
-            self.load_station(str(station))
+            self.load_station(stations[str(station)])
 
-    def load_station(self, station_name = None):
-        station = self.stations[station_name]
-        self.browser.load(QtCore.QUrl(station))
+    def load_station(self, station_type):
+        self.station = station_type(self.browser)
+        self.station.load()
 
     def handle_media_key(self, source, event):
-        # TODO: Can we do better than synthesizing key presses?
-        if event == "Play":
-            press_space = QtGui.QKeyEvent(QtCore.QEvent.KeyPress,
-                                          QtCore.Qt.Key_Space,
-                                          QtCore.Qt.NoModifier)
-            self.postEvent(self.browser, press_space)
-        # TODO: handle Previous, Next, Stop
+        self.station.press_key(event)
+
+class Station(object):
+    def __init__(self, browser):
+        self.browser = browser
+        self.url = None
+
+    def load(self):
+        self.browser.load(QtCore.QUrl(self.url))
+
+    def press_key(self):
+        pass
+
+class Pandora(Station):
+    def __init__(self, browser):
+        Station.__init__(self, browser)
+        self.url = "http://www.pandora.com"
+        self.is_paused = False
+
+    def press_key(self, key):
+        if key == "Play" and self.is_paused:
+            cmd = "ext_play"
+            self.is_paused = False
+        elif key == "Play" or key == "Stop":
+            cmd = "ext_pause"
+            self.is_paused = True
+        else:
+            print "'%s' is not supported." % key
+            return
+        frame = self.browser.page().mainFrame()
+        frame.evaluateJavaScript('Pandora.sendTunerCommand("%s", "");' % cmd)
+
+class GrooveShark(Station):
+    def __init__(self, browser):
+        Station.__init__(self, browser)
+        self.url = "http://www.grooveshark.com"
+
+    def press_key(self, key):
+        js_funcs = {"Play": "togglePlayPause",
+                    "Stop": "pause",
+                    "Previous": "previous",
+                    "Next": "next"}
+        frame = self.browser.page().mainFrame()
+        frame.evaluateJavaScript("Grooveshark.%s();" % js_funcs[key])
 
 def configure_dbus(radio):
     dbus.mainloop.qt.DBusQtMainLoop(set_as_default=True)
