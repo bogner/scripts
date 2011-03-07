@@ -3,39 +3,45 @@
 import dbus, dbus.mainloop.qt
 import signal
 import sys
-from PyQt4 import QtGui, QtCore, QtWebKit
+from PyQt4 import QtCore, QtGui, QtWebKit
 
 def main(argv):
     # We want ctrl-c to kill qt
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    app = QtGui.QApplication(argv)
-    radio = RadioWindow()
+    radio = Radio(argv)
     radio.choose_station()
-    radio.show()
+    radio.window.show()
 
     configure_dbus(radio)
 
-    return app.exec_()
+    return radio.exec_()
 
-class RadioWindow(QtGui.QMainWindow):
-    def __init__(self):
-        QtGui.QMainWindow.__init__(self)
-        self.browser = QtWebKit.QWebView(titleChanged = self.setWindowTitle)
-        self.setCentralWidget(self.browser)
+class Radio(QtGui.QApplication):
+    def __init__(self, argv):
+        QtGui.QApplication.__init__(self, argv)
+        self.window = QtGui.QMainWindow()
+        self.quitOnLastWindowClosed = True
+
+        self.browser = QtWebKit.QWebView(
+            titleChanged = self.window.setWindowTitle)
+        self.window.setCentralWidget(self.browser)
 
         settings = self.browser.settings()
         settings.setAttribute(QtWebKit.QWebSettings.PluginsEnabled, True)
 
-        QtGui.QShortcut("Ctrl+S", self, activated = self.choose_station)
+        QtGui.QShortcut("Ctrl+S", self.window, activated = self.choose_station)
 
         self.stations = {"pandora": "http://www.pandora.com",
                          "grooveshark": "http://grooveshark.com"}
 
     def choose_station(self):
         stations = self.stations.keys()
-        station, ok = QtGui.QInputDialog.getItem(
-            self, "Choose a station", "Station:", stations, editable = False)
+        station, ok = QtGui.QInputDialog.getItem(self.window,
+                                                 "Choose a station",
+                                                 "Station:",
+                                                 stations,
+                                                 editable = False)
         if ok:
             self.load_station(str(station))
 
