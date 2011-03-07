@@ -50,7 +50,13 @@ class Radio(QtGui.QApplication):
         self.browser.load(QtCore.QUrl(station))
 
     def handle_media_key(self, source, event):
-        print "Media key: %s" % event
+        # TODO: Can we do better than synthesizing key presses?
+        if event == "Play":
+            press_space = QtGui.QKeyEvent(QtCore.QEvent.KeyPress,
+                                          QtCore.Qt.Key_Space,
+                                          QtCore.Qt.NoModifier)
+            self.postEvent(self.browser, press_space)
+        # TODO: handle Previous, Next, Stop
 
 def configure_dbus(radio):
     dbus.mainloop.qt.DBusQtMainLoop(set_as_default=True)
