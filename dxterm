@@ -1,0 +1,11 @@
+#!/bin/bash
+
+type -t dtach >/dev/null || die "dtach: command not found"
+[ -d ~/.dtach ] || mkdir ~/.dtach
+
+sock=~/.dtach/dxterm
+
+n=$(ls $sock.* 2>/dev/null | \
+    awk -F. '{if ($NF-n > 1) exit; n=$NF} END {print n+1}')
+export DXTERM="$n. "
+exec xterm -e dtach -c $sock.$n -Ezr winch $SHELL

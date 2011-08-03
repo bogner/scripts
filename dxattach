@@ -1,0 +1,2 @@
+#!/bin/bash
+exec dtach -a ~/.dtach/dxterm.$1
