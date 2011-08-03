@@ -20,6 +20,7 @@ def main(argv):
 class Radio(QtGui.QApplication):
     def __init__(self, argv):
         QtGui.QApplication.__init__(self, argv)
+        self.setWindowIcon(QtGui.QIcon.fromTheme("applications-multimedia"))
 
         self.window = QtGui.QMainWindow()
         self.quitOnLastWindowClosed = True
