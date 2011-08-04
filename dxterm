@@ -4,8 +4,18 @@ type -t dtach >/dev/null || die "dtach: command not found"
 [ -d ~/.dtach ] || mkdir ~/.dtach
 
 sock=~/.dtach/dxterm
-
 n=$(ls $sock.* 2>/dev/null | \
     awk -F. '{if ($NF-n > 1) exit; n=$NF} END {print n+1}')
+script=$(cat<<EOF
+sleep=0;
+while sleep \$sleep; do
+    sleep=2;
+    dtach -c $sock.$n -Ezr winch $SHELL;
+    echo "Respawning."
+done;
+sleep 10;
+EOF
+)
+
 export DXTERM="$n. "
-exec xterm -e dtach -c $sock.$n -Ezr winch $SHELL
+exec xterm -e "$script"
