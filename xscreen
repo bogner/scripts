@@ -1,0 +1,13 @@
+#!/bin/bash
+
+die () { echo "$@" >&2; exit 1; }
+
+[ $# -eq 1 ] || die "usage: xscreen <num>"
+type -t screen >/dev/null || die "screen: command not found"
+
+rc="$0.screenrc"
+
+screen -q -S xterms -ls
+[ $? -ge 11 ] || screen -c "$rc" -S xterms -d -m
+
+exec screen -c "$rc" -S xterms -xp $1
