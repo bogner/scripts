@@ -1,7 +1,7 @@
 #!/bin/bash
 
 /usr/bin/indent -nbad -bap -nbbb -nbbo -nbc -bli0 -br -brs -c33 -cbi0 -cd33 \
-    -ncdb -cdw -ce -ci4 -cli0 -cp33 -ncs -d0 -nbfda -nbfde -di1 -nfc1 -nfca \
+    -ncdb -cdw -ce -ci4 -cli0 -cp33 -ncs -d0 -nbfda -nbfde -di1 -fc1 -nfca \
     -nhnl -i4 -ip0 -l80 -lc80 -lp -nlps -npcs -pi1 -nprs -psl -saf -sai -saw \
     -sbi0 -nsc -nsob -nss -ts4 -nut "$@"
 
@@ -51,7 +51,7 @@ exit $?
     Break the line after the last argument in a declaration.
 -di1
     Put variables in column n.
--nfc1
+-fc1
     Format comments in the first column.
 -nfca
     Do not disable all formatting of comments.
