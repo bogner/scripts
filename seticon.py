@@ -1,27 +1,28 @@
 #!/usr/bin/env python
 
-import Xlib.display, Xlib.error, gtk, sys
+import Xlib.display, Xlib.error, gobject, gtk, sys
 from array import array
 
 def main(argv):
     if len(argv) < 3:
-        sys.stderr.write('Usage: set-icon icon_file window [window ...]\n')
+        sys.stderr.write('Usage: set-icon icon_name window [window ...]\n')
         return 1
     try:
         set_window_icons(argv[1], argv[2:])
-    except:
-        raise
+    except gobject.GError, e:
+        sys.stderr.write('Could not load icon: %s\n' % e)
+        return 2
+    return 0
 
-def set_window_icons(icon_file, windows):
-    icon = Icon(icon_file)
+def set_window_icons(icon_name, windows):
+    icon = Icon(icon_name)
     painter = WindowPainter()
     for win_id in windows:
         painter.draw_icon(win_id, icon)
 
 class Icon:
-    def __init__(self, filename):
-        self.pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
-        self.ensure_alpha()
+    def __init__(self, name):
+        self.pixbuf = gtk.icon_theme_get_default().load_icon(name, 48, 0)
 
     def scale(self, width, height):
         self.pixbuf = self.pixbuf.scale_simple(width, height,
