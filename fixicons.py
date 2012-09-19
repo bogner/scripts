@@ -6,8 +6,9 @@ import gobject
 import subprocess
 import sys
 
-icons = {'xterm-256color': 'terminal',
-         'rdesktop':       'gnome-remote-desktop'}
+icons = {'xterm-256color':  'terminal',
+         'screen-256color': 'terminal',
+         'rdesktop':        'gnome-remote-desktop'}
 
 def main(argv):
     try:
