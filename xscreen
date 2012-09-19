@@ -8,6 +8,6 @@ type -t screen >/dev/null || die "screen: command not found"
 rc="$0.screenrc"
 
 screen -q -S xterms -ls
-[ $? -ge 11 ] || screen -c "$rc" -S xterms -d -m
+[ $? -ge 11 ] || (screen -c "$rc" -S xterms -d -m; sleep 0.1)
 
 exec screen -c "$rc" -S xterms -xp $1
