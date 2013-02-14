@@ -8,6 +8,7 @@ import sys
 
 icons = {'xterm-256color':  'terminal',
          'screen-256color': 'terminal',
+         'irssi':           'applications-chat',
          'rdesktop':        'gnome-remote-desktop'}
 
 def main(argv):
