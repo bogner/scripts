@@ -1,0 +1,62 @@
+#!/bin/sh
+
+LEDS="caps scroll num" # Any of: caps scroll num
+TTY=/dev/tty7
+
+Tdot=0.2
+Tdash=0.6 # 3 * Tdot
+Tword=1.4 # 7 * Tdot
+
+die () { echo "$0: $@" >&2; exit 1; }
+
+start () { setleds -L $(echo $LEDS | sed 's/^\| /\0+/g') <$TTY; }
+stop ()  { setleds -L $(echo $LEDS | sed 's/^\| /\0-/g') <$TTY; }
+dot ()  { start; sleep $Tdot;  stop; sleep $Tdot; }
+dash () { start; sleep $Tdash; stop; sleep $Tdot; }
+
+letter () {
+    case "$1" in
+        a|A) dot;dash;;
+        b|B) dash;dot;dot;dot;;
+        c|C) dash;dot;dash;dot;;
+        d|D) dash;dot;dot;;
+        e|E) dot;;
+        f|F) dot;dot;dash;dot;;
+        g|G) dash;dash;dot;;
+        h|H) dot;dot;dot;dot;;
+        i|I) dot;dot;;
+        j|J) dot;dash;dash;dash;;
+        k|K) dash;dot;dash;;
+        l|L) dot;dash;dot;dot;;
+        m|M) dash;dash;;
+        n|N) dash;dot;;
+        o|O) dash;dash;dash;;
+        p|P) dot;dash;dash;dot;;
+        q|Q) dash;dash;dot;dash;;
+        r|R) dot;dash;dot;;
+        s|S) dot;dot;dot;;
+        t|T) dash;;
+        u|U) dot;dot;dash;;
+        v|V) dot;dot;dot;dash;;
+        w|W) dot;dash;dash;;
+        x|X) dash;dot;dot;dash;;
+        y|Y) dash;dot;dash;dash;;
+        z|Z) dash;dash;dot;dot;;
+        *)   ;; # Ignore everything else...
+    esac
+}
+
+word () {
+    for l in $(echo "$1" | sed 's/./\0 /g'); do
+        letter $l
+        sleep $Tdash
+    done
+}
+
+[ $# -ge 1 ] || die "Not enough arguments"
+word "$1"
+shift
+for w in "$@"; do
+    sleep $Tword
+    word "$@"
+done
