@@ -45,7 +45,7 @@ class WindowPainter:
 
     def draw_icon(self, window_id, icon):
         if isinstance(window_id, basestring):
-            window_id = int(window_id, 16)
+            window_id = int(window_id, 0)
         window = self.display.create_resource_object('window', window_id)
         bitmap = icon.get_raw_bitmap()
         window.change_property(self.icon_atom, Xlib.Xatom.CARDINAL, 32, bitmap)

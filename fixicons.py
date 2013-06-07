@@ -6,11 +6,12 @@ import gobject
 import subprocess
 import sys
 
-icons = {'xterm-256color':  'terminal',
-         'screen-256color': 'terminal',
-         'irssi':           'applications-chat',
-         'TightVNC':        'gnome-remote-desktop',
-         'rdesktop':        'gnome-remote-desktop'}
+icons = (('(xterm-256color)',  'terminal'),
+         ('(screen-256color)', 'terminal'),
+         ('(st-256color)',     'terminal'),
+         ('irssi.',            'applications-chat'),
+         ('TightVNC',          'gnome-remote-desktop'),
+         ('rdesktop',          'gnome-remote-desktop'))
 
 def main(argv):
     try:
@@ -21,15 +22,16 @@ def main(argv):
     return 0
 
 def set_icons():
-    for name,icon in icons.items():
+    for name,icon in icons:
         wins = list(get_windows(name))
         print 'Setting "%s" as the icon for %d windows' % (icon,len(wins))
         seticon.set_window_icons(icon, wins)
 
 def get_windows(name):
-    for line in subprocess.check_output(['wmctrl', '-l']).splitlines():
-        if name in line:
-            yield line.split()[0]
+    proc = subprocess.Popen(['xdotool', 'search', '--name', name],
+                            stdout=subprocess.PIPE)
+    out, _ = proc.communicate()
+    return [line.strip() for line in out.splitlines()]
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
