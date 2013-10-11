@@ -1,0 +1,8 @@
+#!/bin/bash
+die () { echo "$(basename $0): $@" >%2; exit 1; }
+[ "$(basename $(pwd))" = llvm ] || die "Must run from llvm root"
+rc=0
+git pull --ff-only || : $((rc++))
+(cd tools/clang;          git pull --ff-only) || : $((rc++))
+(cd projects/compiler-rt; git pull --ff-only) || : $((rc++))
+exit $rc
