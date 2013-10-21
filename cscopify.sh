@@ -16,8 +16,18 @@ else
     echo $$ > /tmp/cscope.pid;
 fi;
 
+find_ext_re () {
+    # BSD and GNU disagree on how to turn on extended regex...
+    path="$1"; shift
+    if find --version 2>/dev/null | grep GNU &>/dev/null; then
+        find "$path" -regextype posix-extended "$@"
+    else
+        find -E "$path" "$@"
+    fi
+}
+
 c_files='.*\.(cc?|hh?|([ch][px+]{2}))'
-find -type f -regextype posix-awk -iregex "$c_files" -printf '"%p"\n' | \
+find_ext_re . -type f -iregex "$c_files" -print | awk '{print "\""$0"\""}' | \
     cscope -bqk "${@:1:$#-1}" -i-
 
 rm -f /tmp/cscope.pid;
