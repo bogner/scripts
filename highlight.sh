@@ -8,4 +8,4 @@ while [ $# -gt 0 ] && [ "$1" != "--" ]; do
     shift
 done
 
-sed "${exp#;}" $@
+sed "${exp#;}" "$@"
