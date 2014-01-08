@@ -1,0 +1,15 @@
+#!/bin/bash
+die () { echo "$(basename $0): $@" >%2; exit 1; }
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+cd $repo_root || die "Not in git repository?"
+[ $(basename $(pwd)) = clang ] && cd ../..
+[ $(basename $(pwd)) = llvm ] || die "Not in LLVM repository?"
+
+rc=0
+for repo in $(find . -name .git -exec dirname \{} \;); do
+    (cd $repo; echo -n "$(basename $(pwd)): "; echo "$(git "$@")") || \
+        : $((rc++))
+done
+
+exit $rc

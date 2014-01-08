@@ -1,0 +1,8 @@
+#!/bin/bash
+die () { echo "$(basename $0): $@" >&2; exit 1; }
+
+[ $# -eq 1 ] || die "Exactly one argument is required"
+[[ "$1" == r* ]] || die "Invalid revision"
+rev="$(git svn find-rev --before "$1")"
+[ -n "$rev" ] || die "Revision not found"
+git checkout "$rev"
