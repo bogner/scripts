@@ -27,6 +27,8 @@ parser.add_argument('--disable-werror', dest='werror', action='store_false')
 parser.add_argument('--disable-runtime', dest='runtime',
                     action='store_false', default=None,
                     help='Disable build of compiler-rt and libc++')
+parser.add_argument('--export-compiledb', action='store_true', default=False,
+                    help='Export a compilation database')
 parser.add_argument('--targets', default='all',
                     help='Limit which targets to build')
 parser.add_argument('--prefix',
@@ -55,6 +57,8 @@ if args.werror is not None:
     command.append('-DLLVM_ENABLE_WERROR={}'.format(on_off(args.werror)))
 if args.runtime is not None:
     command.append('-DLLVM_BUILD_RUNTIME={}'.format(on_off(args.runtime)))
+if args.export_compiledb:
+    command.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
 if args.targets:
     command.append('-DLLVM_TARGETS_TO_BUILD={}'.format(args.targets))
 if args.prefix:
