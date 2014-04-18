@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+import argcomplete
+import argparse
+import subprocess as sp
+import os
+import sys
+
+parser = argparse.ArgumentParser(description='Wrapper for cmake with LLVM')
+parser.add_argument('llvmdir', help='The LLVM source directory')
+parser.add_argument('-G', '--generator', default='Ninja',
+                    choices=['Ninja', 'Make'])
+parser.add_argument('-b', '--build-type', default='Release',
+                    choices=['Release', 'Debug',
+                             'RelWithDebInfo', 'MinSizeRel'],
+                    help='Specify the build configuration')
+parser.add_argument('--sanitizer',
+                    choices=['Address', 'Memory', 'MemoryWithOrigins'])
+parser.add_argument('--enable-asserts', dest='asserts',
+                    action='store_true', default=None,
+                    help='Build with assertions enabled')
+parser.add_argument('--disable-asserts', dest='asserts', action='store_false')
+parser.add_argument('--enable-werror', dest='werror',
+                    action='store_true', default=None,
+                    help='Build with -Werror')
+parser.add_argument('--disable-werror', dest='werror', action='store_false')
+parser.add_argument('--disable-runtime', dest='runtime',
+                    action='store_false', default=None,
+                    help='Disable build of compiler-rt and libc++')
+parser.add_argument('--targets', default='all',
+                    help='Limit which targets to build')
+parser.add_argument('--prefix',
+                    help='Where to install the resulting binaries')
+parser.add_argument('--host-compiler',
+                    help='The C compiler to use for compilation.')
+parser.add_argument('--cflags',
+                    help='Extra CFLAGS to use during the build')
+argcomplete.autocomplete(parser)
+args = parser.parse_args()
+
+def on_off(b):
+    return 'ON' if b else 'OFF'
+def cxx(cc):
+    mapping = {'cc': 'c++', 'gcc': 'g++', 'clang': 'clang++'}
+    return os.path.join(os.path.dirname(cc), mapping[os.path.basename(cc)])
+
+command = ['cmake', '-G', args.generator, args.llvmdir]
+if args.build_type:
+    command.append('-DCMAKE_BUILD_TYPE={}'.format(args.build_type))
+if args.sanitizer:
+    command.append('-DLLVM_USE_SANITIZER={}'.format(args.sanitizer))
+if args.asserts is not None:
+    command.append('-DLLVM_ENABLE_ASSERTIONS={}'.format(on_off(args.asserts)))
+if args.werror is not None:
+    command.append('-DLLVM_ENABLE_WERROR={}'.format(on_off(args.werror)))
+if args.runtime is not None:
+    command.append('-DLLVM_BUILD_RUNTIME={}'.format(on_off(args.runtime)))
+if args.targets:
+    command.append('-DLLVM_TARGETS_TO_BUILD={}'.format(args.targets))
+if args.prefix:
+    command.append('-DCMAKE_INSTALL_PREFIX={}'.format(args.prefix))
+if args.host_compiler:
+    command.append('-DCMAKE_C_COMPILER={}'.format(args.host_compiler))
+    command.append('-DCMAKE_CXX_COMPILER={}'.format(cxx(args.host_compiler)))
+if args.cflags:
+    command.append('-DCMAKE_C_FLAGS={}'.format(args.cflags))
+    command.append('-DCMAKE_CXX_FLAGS={}'.format(args.cflags))
+
+with open('cmake.command', 'w') as fd:
+    fd.write('# {}\n'.format(' '.join('{!r}'.format(c) for c in sys.argv)))
+    fd.write('{}\n'.format(' '.join('{!r}'.format(c) for c in command)))
+sys.exit(sp.call(command))
