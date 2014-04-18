@@ -7,7 +7,7 @@ cd $repo_root || die "Not in git repository?"
 [[ $(basename $(pwd)) == llvm* ]] || die "Not in LLVM repository?"
 
 rc=0
-for repo in $(find . -name .git -exec dirname \{} \;); do
+for repo in $(find . -type d -name .git -exec dirname \{} \;); do
     (cd $repo; echo -n "$(basename $(pwd)): "; git "$@") || \
         : $((rc++))
 done
