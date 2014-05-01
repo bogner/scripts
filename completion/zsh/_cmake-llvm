@@ -1,0 +1,15 @@
+#compdef cmake-llvm
+
+_arguments \
+    :"directory":"_files -/"                                             \
+    {-G,--generator}:"generator":"(Ninja Make)"                          \
+    {-b,--build-type}:"type":"(Release Debug RelWithDebInfo MinSizeRel)" \
+    --sanitizer:"type":"(Address Memory MemoryWithOrigins)"              \
+    --{en,dis}able-asserts                                               \
+    --{en,dis}able-werror                                                \
+    --disable-runtime                                                    \
+    --export-compiledb                                                   \
+    --targets:"targets to build":                                        \
+    --prefix:"directory":"_files -/"                                     \
+    --host-compiler:"path":'_files -W path -g "(clang|gcc|cc)"'          \
+    --cflags:"extra flags":
