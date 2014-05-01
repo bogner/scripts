@@ -1,0 +1,5 @@
+#compdef git-llvm
+#description Run git commands on all repos in an LLVM tree
+
+[[ $service == git-llvm ]] && service=git
+_git
