@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import argcomplete
 import argparse
 import subprocess as sp
 import os
@@ -37,7 +36,12 @@ parser.add_argument('--host-compiler',
                     help='The C compiler to use for compilation.')
 parser.add_argument('--cflags',
                     help='Extra CFLAGS to use during the build')
-argcomplete.autocomplete(parser)
+try:
+    import argcomplete
+    argcomplete.autocomplete(parser)
+except ImportError:
+    pass
+
 args = parser.parse_args()
 
 def on_off(b):
