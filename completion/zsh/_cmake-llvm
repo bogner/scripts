@@ -13,3 +13,10 @@ _arguments \
     --prefix:"directory":"_files -/"                                     \
     --host-compiler:"path":'_files -W path -g "(clang|gcc|cc)"'          \
     --cflags:"extra flags":
+
+# Local Variables:
+# mode: Shell-Script
+# sh-indentation: 4
+# indent-tabs-mode: nil
+# sh-basic-offset: 2
+# End:
