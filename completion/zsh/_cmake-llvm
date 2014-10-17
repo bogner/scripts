@@ -1,5 +1,12 @@
 #compdef cmake-llvm
 
+(( $+functions[_cmake-llvm_targets] )) ||
+_cmake-llvm_targets() {
+  _values -s , 'targets to build' \
+          all AArch64 ARM CppBackend Hexagon Mips MSP430 NVPTX PowerPC \
+          R600 Sparc SystemZ X86 XCore
+}
+
 _arguments \
     :"directory":"_files -/"                                             \
     {-G,--generator}:"generator":"(Ninja Make)"                          \
@@ -9,7 +16,7 @@ _arguments \
     --{en,dis}able-werror                                                \
     --disable-runtime                                                    \
     --export-compiledb                                                   \
-    --targets:"targets to build":                                        \
+    --targets:' ':_cmake-llvm_targets                                    \
     --prefix:"directory":"_files -/"                                     \
     --host-compiler:"path":'_files -W path -g "(clang|gcc|cc)"'          \
     --cflags:"extra flags":

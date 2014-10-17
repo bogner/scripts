@@ -29,7 +29,7 @@ parser.add_argument('--disable-runtime', dest='runtime',
 parser.add_argument('--export-compiledb', action='store_true', default=False,
                     help='Export a compilation database')
 parser.add_argument('--targets', default='all',
-                    help='Limit which targets to build')
+                    help='List of targets to build, separated by commas')
 parser.add_argument('--prefix',
                     help='Where to install the resulting binaries')
 parser.add_argument('--host-compiler',
@@ -64,7 +64,8 @@ if args.runtime is not None:
 if args.export_compiledb:
     command.append('-DCMAKE_EXPORT_COMPILE_COMMANDS=ON')
 if args.targets:
-    command.append('-DLLVM_TARGETS_TO_BUILD={}'.format(args.targets))
+    targets = ';'.join(args.targets.split(','))
+    command.append('-DLLVM_TARGETS_TO_BUILD={}'.format(targets))
 if args.prefix:
     command.append('-DCMAKE_INSTALL_PREFIX={}'.format(args.prefix))
 if args.host_compiler:
