@@ -1,15 +1,23 @@
-#!/bin/bash
-die () { echo "$(basename $0): $@" >%2; exit 1; }
+#!/bin/zsh
+zmodload -F zsh/stat b:zstat
 
-repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"
-cd $repo_root || die "Not in git repository?"
-[ $(basename $(pwd)) = clang ] && cd ../..
-[[ $(basename $(pwd)) == llvm* ]] || die "Not in LLVM repository?"
+die () { echo "$(basename $0): $@" >&2; exit 1; }
+
+is_llvm_dir () { [ -d .git ] && [ -d include/llvm ]; }
+
+original_device=$(zstat +device .)
+until is_llvm_dir; do
+    cd ..
+    if [ $PWD = / ] || [ $original_device -ne $(zstat +device .) ]; then
+        die "Not in LLVM repository?"
+    fi
+done
 
 rc=0
-for repo in $(find . -type d -name .git -exec dirname \{} \;); do
-    (cd $repo; echo -n "$(basename $(pwd)): "; git "$@") || \
-        : $((rc++))
+echo -n "llvm: ";
+git "$@" || : $((rc++))
+for repo in */**/.git(/:h); do
+    (cd $repo; echo -n "${PWD:t}: "; git "$@") || : $((rc++))
 done
 
 exit $rc
