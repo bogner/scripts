@@ -1,0 +1,52 @@
+#compdef clang clang++
+
+(( $+functions[_clang_languages] )) ||
+_clang_languages() {
+  _values 'language' \
+      c cl cuda  objective-c c++ objective-c++ \
+      cpp-output objc-cpp-output c++-cpp-output objc++-cpp-output \
+      c-header cl-header objective-c-header c++-header objective-c++-header \
+      ada assembler assembler-with-cpp f95 f95-cpp-input java \
+      ir ast pcm treelang none
+}
+
+local context line state state_descr
+typeset -A opt_args
+_arguments \
+    '-cc1:*: :->cc1' \
+    '*: :->driver'
+
+local -a extra_argspecs
+case "$state" in
+  driver)
+    extra_argspecs=(
+      '-###[Print the commands to run for this compilation]'
+      '-resource-dir[Directory with compiler resource files]: :_files -/'
+    )
+    ;;
+  cc1)
+    # Add -cc1 to the command so that _arguments invokes the -cc1 help
+    words[1]="$words[1] -cc1"
+    ;;
+esac
+
+_arguments \
+    '*:input:_files -g "*.([cCmisSoa]|cc|cxx|cpp|mm|ii)(-.)"' \
+    $extra_argspecs \
+    -Wall -Werror -Wextra -Weverything \
+    '*-Wa,-[Pass arg to the assembler]:assembler option:' \
+    '*-Wl,-[Pass arg to the linker]:linker option:' \
+    '*-Wp,-[Pass arg to the preprocessor]:preprocessor option:' \
+    -- \
+    -i '(-Wa -Wl -Wp)' \
+    '*include search path*:path:_files -/' \
+    '-isysroot:path:_files -/' \
+    '-x: :_clang_languages' \
+    '-X*:arg:'
+
+# Local Variables:
+# mode: Shell-Script
+# sh-indentation: 4
+# indent-tabs-mode: nil
+# sh-basic-offset: 2
+# End:
