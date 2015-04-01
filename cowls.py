@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 ''' April fools! Your normal ls binary is at /bin/ls.real '''
 
-import fcntl
 import os
-import struct
+import pexpect
 import subprocess as sp
 import sys
-import termios
 
 REAL_LS = '/bin/ls'
 if sys.argv[0] == REAL_LS:
@@ -34,19 +32,18 @@ def fallback_to_real_ls():
 if not sys.stdout.isatty():
     fallback_to_real_ls()
 
-rows, cols = map(int, os.popen('stty size', 'r').read().strip().split())
-cols -= 12
+rows, cols = os.popen('stty size', 'r').read().strip().split()
+cols = int(cols) - 12
 if cols < 30:
     fallback_to_real_ls()
 
-cowls_input, ls_out = os.openpty()
-fcntl.ioctl(ls_out, termios.TIOCSWINSZ, struct.pack('HHHH', rows, cols, 0, 0))
-sp.call([REAL_LS] + sys.argv[1:], stdout=ls_out)
+class HackedSpawn(pexpect.spawn):
+    def setwinsize(self, dont_know, dont_care):
+        pexpect.spawn.setwinsize(self, int(rows), int(cols))
 
-fcntl.fcntl(cowls_input, fcntl.F_SETFL,
-            fcntl.fcntl(cowls_input, fcntl.F_GETFL) | os.O_NONBLOCK)
-buf = os.fdopen(cowls_input).read()
-lines = buf.split('\n')
+proc = HackedSpawn(sp.list2cmdline([REAL_LS] + sys.argv[1:]))
+out = proc.read()
+lines = out.splitlines()
 if not lines:
     lines = ["Moo..."]
 width = find_max_width(lines)
@@ -69,3 +66,4 @@ print ("        \\   ^__^\n"
        "            (__)\\       )\\/\\\n"
        "                ||----w |\n"
        "                ||     ||")
+
