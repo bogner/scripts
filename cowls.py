@@ -47,6 +47,8 @@ lines = out.splitlines()
 if not lines:
     lines = ["Moo..."]
 width = find_max_width(lines)
+if width > cols + 12:
+    fallback_to_real_ls()
 
 if len(lines) == 1:
     sides = ["<>"]
@@ -66,4 +68,3 @@ print ("        \\   ^__^\n"
        "            (__)\\       )\\/\\\n"
        "                ||----w |\n"
        "                ||     ||")
-
