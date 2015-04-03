@@ -14,7 +14,8 @@ parser.add_argument('-b', '--build-type', default='Release',
                              'RelWithDebInfo', 'MinSizeRel'],
                     help='Specify the build configuration')
 parser.add_argument('--sanitizer',
-                    choices=['Address', 'Memory', 'MemoryWithOrigins'])
+                    choices=['Address', 'Memory', 'MemoryWithOrigins',
+                             'Undefined', 'Thread'])
 parser.add_argument('--enable-asserts', dest='asserts',
                     action='store_true', default=None,
                     help='Build with assertions enabled')
