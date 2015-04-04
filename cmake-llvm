@@ -75,6 +75,8 @@ if args.host_compiler:
 if args.cflags:
     command.append('-DCMAKE_C_FLAGS={}'.format(args.cflags))
     command.append('-DCMAKE_CXX_FLAGS={}'.format(args.cflags))
+    if '-flto' in args.cflags:
+        command.append('-DLLVM_PARALLEL_LINK_JOBS=1')
 
 with open('cmake.command', 'w') as fd:
     fd.write('# {}\n'.format(' '.join('{!r}'.format(c) for c in sys.argv)))
