@@ -7,11 +7,17 @@ _cmake-llvm_targets() {
           R600 Sparc SystemZ X86 XCore
 }
 
+(( $+functions[_cmake-llvm_sanitizers] )) ||
+_cmake-llvm_sanitizers() {
+  _values -s , 'type' \
+          Address Memory MemoryWithOrigins Undefined Thread
+}
+
 _arguments \
     :"directory":"_files -/"                                                  \
     {-G,--generator}:"generator":"(Ninja Make)"                               \
     {-b,--build-type}:"type":"(Release Debug RelWithDebInfo MinSizeRel)"      \
-    --sanitizer:"type":"(Address Memory MemoryWithOrigins Undefined Thread)"  \
+    --sanitizer:' ':_cmake-llvm_sanitizers                                    \
     --{en,dis}able-asserts                                                    \
     --{en,dis}able-werror                                                     \
     --disable-runtime                                                         \

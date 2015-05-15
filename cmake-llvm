@@ -15,7 +15,7 @@ parser.add_argument('-b', '--build-type', default='Release',
                     help='Specify the build configuration')
 parser.add_argument('--sanitizer',
                     choices=['Address', 'Memory', 'MemoryWithOrigins',
-                             'Undefined', 'Thread'])
+                             'Undefined', 'Thread', 'Address,Undefined'])
 parser.add_argument('--enable-asserts', dest='asserts',
                     action='store_true', default=None,
                     help='Build with assertions enabled')
@@ -55,7 +55,8 @@ command = ['cmake', '-G', args.generator, args.llvmdir]
 if args.build_type:
     command.append('-DCMAKE_BUILD_TYPE={}'.format(args.build_type))
 if args.sanitizer:
-    command.append('-DLLVM_USE_SANITIZER={}'.format(args.sanitizer))
+    sanitizers = ';'.join(args.sanitizer.split(','))
+    command.append('-DLLVM_USE_SANITIZER={}'.format(sanitizers))
 if args.asserts is not None:
     command.append('-DLLVM_ENABLE_ASSERTIONS={}'.format(on_off(args.asserts)))
 if args.werror is not None:
