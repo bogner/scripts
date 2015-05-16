@@ -26,7 +26,7 @@ _arguments \
     --targets:' ':_cmake-llvm_targets                                         \
     --prefix:"directory":"_files -/"                                          \
     --host-compiler:"path":'_files -W path -g "(clang|gcc|cc)"'               \
-    --cflags:"extra flags":
+    --cflags=:"extra flags":
 
 # Local Variables:
 # mode: Shell-Script
