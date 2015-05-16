@@ -20,6 +20,7 @@ _arguments \
     --sanitizer:' ':_cmake-llvm_sanitizers                                    \
     --{en,dis}able-asserts                                                    \
     --{en,dis}able-werror                                                     \
+    --{en,dis}able-fuzzer                                                     \
     --disable-runtime                                                         \
     --export-compiledb                                                        \
     --targets:' ':_cmake-llvm_targets                                         \
