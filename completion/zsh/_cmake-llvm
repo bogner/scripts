@@ -19,8 +19,9 @@ _arguments \
     {-b,--build-type}:"type":"(Release Debug RelWithDebInfo MinSizeRel)"      \
     --sanitizer:' ':_cmake-llvm_sanitizers                                    \
     --{en,dis}able-asserts                                                    \
-    --{en,dis}able-werror                                                     \
+    --{en,dis}able-bootstrap                                                  \
     --{en,dis}able-fuzzer                                                     \
+    --{en,dis}able-werror                                                     \
     --disable-runtime                                                         \
     --export-compiledb                                                        \
     --targets:' ':_cmake-llvm_targets                                         \
