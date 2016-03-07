@@ -1,0 +1,155 @@
+#compdef cmake
+
+(( $+functions[_cmake_bool] )) ||
+_cmake_bool() {
+  local -a bools
+  bools=(1 ON On YES TRUE Y 0 OFF Off NO FALSE N)
+  _describe 'boolean' bools
+}
+
+(( $+functions[_cmake_generators] )) ||
+_cmake_generators() {
+  local -a generators
+  generators=(
+    'Unix Makefiles'
+    'Ninja'
+  )
+  _describe 'generator' generators
+}
+
+(( $+functions[_cmake_help] )) ||
+_cmake_help() {
+  local -a items
+  local what="${argv[-1]}"
+  items=(${(f)"$(cmake --help-$what-list 2>/dev/null)"})
+  _describe "$what" items
+}
+
+(( $+functions[_cmake_osx_sysroots] )) ||
+_cmake_osx_sysroots() {
+  local -a paths names
+  local platforms="$(xcode-select -p)"/Platforms
+  paths=(${(f)"$(find $platforms/*.platform/Developer/SDKs/*.sdk -prune)"})
+  names=(${(f)"$(for name in $paths; do
+                   basename $name .sdk | tr '[A-Z]' '[a-z]'
+                 done)"})
+
+  _describe -t globbed-files 'path' paths
+  _describe -t names 'name' names
+}
+
+local -a cmake_define_opts
+cmake_define_opts=(
+  '-DCMAKE_BUILD_TYPE=:build type:(Debug Release RelWithDebInfo MinSizeRel)'
+  '-DCMAKE_TOOLCHAIN_FILE=: :_files -g "*.cmake"'
+
+  '-DCMAKE_EXPORT_COMPILE_COMMANDS=: :_cmake_bool'
+  '-DCMAKE_INSTALL_PREFIX=: :_files -/'
+  '-DCMAKE_MAKE_PROGRAM=:path:_files -W path'
+
+  '-DCMAKE_CXX_COMPILER=:path:_files -W path -g "(clang++|g++|c++)"'
+  '-DCMAKE_CXX_FLAGS=: :'
+  '-DCMAKE_C_COMPILER=:path:_files -W path -g "(clang|gcc|cc)"'
+  '-DCMAKE_C_FLAGS=: :'
+
+  '-DCMAKE_OSX_ARCHITECTURES=:arch:'
+  '-DCMAKE_OSX_DEPLOYMENT_TARGET=:target:'
+  '-DCMAKE_OSX_SYSROOT=: :_cmake_osx_sysroots'
+)
+
+# TODO: It would be nice to make this pluggable in some way.
+local -a cmake_define_opts_llvm
+cmake_define_opts_llvm=(
+  '-DLLVM_BUILD_LLVM_C_DYLIB=: :_cmake_bool'
+  '-DLLVM_BUILD_LLVM_DYLIB=: :_cmake_bool'
+  '-DLLVM_BUILD_RUNTIME=: :_cmake_bool'
+  '-DLLVM_BUILD_TOOLS=: :_cmake_bool'
+  '-DLLVM_DEFAULT_TARGET_TRIPLE=:triple:'
+  '-DLLVM_DYLIB_COMPONENTS=:components:'
+  '-DLLVM_ENABLE_ASSERTIONS=: :_cmake_bool'
+  '-DLLVM_ENABLE_BACKTRACES=: :_cmake_bool'
+  '-DLLVM_ENABLE_BOOTSTRAP=: :_cmake_bool'
+  '-DLLVM_ENABLE_CRASH_OVERRIDES=: :_cmake_bool'
+  '-DLLVM_ENABLE_LTO=: :_cmake_bool'
+  '-DLLVM_ENABLE_RTTI=: :_cmake_bool'
+  '-DLLVM_ENABLE_TERMINFO=: :_cmake_bool'
+  '-DLLVM_ENABLE_WERROR=: :_cmake_bool'
+  '-DLLVM_ENABLE_ZLIB=: :_cmake_bool'
+  '-DLLVM_EXTERNALIZE_DEBUGINFO=: :_cmake_bool'
+  '-DLLVM_INCLUDE_DOCS=: :_cmake_bool'
+  '-DLLVM_INCLUDE_EXAMPLES=: :_cmake_bool'
+  '-DLLVM_INCLUDE_TESTS=: :_cmake_bool'
+  '-DLLVM_INCLUDE_UTILS=: :_cmake_bool'
+  '-DLLVM_NATIVE_BUILD=: :_files -/'
+  '-DLLVM_PARALLEL_LINK_JOBS=:number:'
+  '-DLLVM_TARGETS_TO_BUILD=:targets:'
+  '-DLLVM_TARGET_ARCH=:arch:'
+  '-DLLVM_USE_SANITIZER=:sanitizers:'
+  '-DLLVM_USE_SANITIZER_COVERAGE=: :_cmake_bool'
+  '-DLLVM_VERSION_MAJOR=:number:'
+  '-DLLVM_VERSION_MINOR=:number:'
+  '-DLLVM_VERSION_PATCH=:number:'
+)
+
+local context line state state_descr
+typeset -A opt_args
+_arguments \
+    - options \
+    "-C[Preload the cache with a script]:initial-cache:_files -g \*.cmake" \
+    "${cmake_define_opts[@]}" \
+    "${cmake_define_opts_llvm[@]}" \
+    "-U[Remove cache entries]:glob:" \
+    "-G+[Specify a build generator]: :_cmake_generators" \
+    "-T[Specify a toolset name]:toolset:" \
+    "-A[Specify a platform name]:platform:" \
+    "(-Wdev -Wno-dev)-Wno-dev[Suppress developer warnings]" \
+    "(-Wdev -Wno-dev)-Wdev[Enable developer warnings]" \
+    "(-L -LA -LH -LAH)"{-L,-LA,-LH,-LAH}"[List cached variables]" \
+    "(*)--build:build directory:_files -/" \
+    "-N[View mode]" \
+    "--debug-trycompile[Do not delete the try_compile build tree]" \
+    "--debug-output[Put cmake in debug mode]" \
+    "--trace[Put cmake in trace mode]" \
+    "--trace-expand[Put cmake in trace mode with variable expansion]" \
+    "--warn-uninitialized[warn about uninitialized values]" \
+    "--warn-unused[warn about unused variables]" \
+    "--no-warn-unused-cli[don't warn about command line options]" \
+    "--check-system-vars[find problems with variables in system files]" \
+    ":source dir:_files -/" \
+    - script \
+    "${cmake_define_opts[@]}" \
+    "${cmake_define_opts_llvm[@]}" \
+    "-P[Process script mode]:file:_files" \
+    - '(command)' \
+    "-E[CMake command mode]:*:command" \
+    "--find-package[Run in pkg-config like mode]:*:options" \
+    "--graphviz=[Generate graphviz of dependencies]:file:" \
+    "--system-information[Dump information about this system]:file:" \
+    - '(help)' \
+    {--help,--usage,-h,-H}'[Print usage information]' \
+    '--version,-version[Print version number]' \
+    '--help-full[Print all help manuals]' \
+    '--help-manual[Print one help manual]: :_cmake_help manual' \
+    '--help-manual-list[List help manuals available]' \
+    '--help-command[Print help for one command]: :_cmake_help command' \
+    '--help-command-list[List commands with help available]' \
+    '--help-commands[Print cmake-commands manual]' \
+    '--help-module[Print help for one module]: :_cmake_help module' \
+    '--help-module-list[List modules with help available]' \
+    '--help-modules[Print cmake-modules manual]' \
+    '--help-policy[Print help for one policy]: :_cmake_help policy' \
+    '--help-policy-list[List policies with help available]' \
+    '--help-policies[Print cmake-policies manual]' \
+    '--help-property[Print help for one property]: :_cmake_help property' \
+    '--help-property-list[List properties with help available]' \
+    '--help-properties[Print cmake-properties manual]' \
+    '--help-variable[Print help for one variable]: :_cmake_help variable' \
+    '--help-variable-list[List variables with help available]' \
+    '--help-variables[Print cmake-variables manual]'
+
+# Local Variables:
+# mode: Shell-Script
+# sh-indentation: 4
+# indent-tabs-mode: nil
+# sh-basic-offset: 2
+# End:
