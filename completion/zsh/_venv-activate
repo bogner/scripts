@@ -1,0 +1,19 @@
+#compdef venv-activate
+
+(( $+functions[_venv-activate_envs] )) ||
+_venv-activate_envs() {
+  local -a envs
+  envs=($(ls ~/env))
+  _describe 'environment' envs
+}
+
+_alternative \
+    paths:directory:'_files -/' \
+    envs:' ':'_venv-activate_envs'
+
+# Local Variables:
+# mode: Shell-Script
+# sh-indentation: 4
+# indent-tabs-mode: nil
+# sh-basic-offset: 2
+# End:

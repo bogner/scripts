@@ -1,0 +1,32 @@
+#!/bin/sh
+
+ENVDIR="$HOME/env"
+
+die () { echo "$@" >&2; exit 1; }
+
+[ $# -eq 1 ] || die "wrong number of arguments"
+
+local_script="$1"/bin/activate
+global_script="$ENVDIR"/"$local_script"
+if [ -e "$local_script" ]; then
+    [ ! -e "$global_script" ] || die "Ambiguous venv specified"
+    activation_script="$local_script"
+elif [ -e "$global_script" ]; then
+    activation_script="$global_script"
+else
+    die "no venv in $1 or $ENV_DIR/$1"
+fi
+
+tmpdir="$(mktemp -d -t venv)"
+[ ! -d $tmpdir ] && die "failed to create temp dir"
+trap 'rm -rf "$tmpdir"' EXIT
+
+ZSHENV="${ZDOTDIR:-$HOME}"/.zshenv
+[ -e "$ZSHENV" ] && cat "$ZSHENV" > $tmpdir/.zshenv
+
+ZSHRC="${ZDOTDIR:-$HOME}"/.zshrc
+[ -e "$ZSHRC" ] && cat "$ZSHRC" > $tmpdir/.zshrc
+cat "$activation_script"       >> $tmpdir/.zshrc
+echo "alias deactivate=exit"   >> $tmpdir/.zshrc
+
+ZDOTDIR="$tmpdir" exec zsh
