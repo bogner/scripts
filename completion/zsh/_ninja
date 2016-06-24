@@ -1,0 +1,18 @@
+#compdef ninja
+
+_arguments \
+    --version -n -v \
+    -C:directory:"_files -/" \
+    -f:file:_files \
+    -{j,l,k}:N: \
+    -d:mode:"($(ninja -d list | awk '/^ +/ {print $1}'))" \
+    -t:tool:"($(ninja -t list | awk '/^ +/ {print $1}'))" \
+    '*':target:"($([ -e build.ninja ] &&
+                       ninja -t targets | awk -F: '{print $1}'))"
+
+# Local Variables:
+# mode: Shell-Script
+# sh-indentation: 4
+# indent-tabs-mode: nil
+# sh-basic-offset: 2
+# End:
