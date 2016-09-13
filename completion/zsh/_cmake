@@ -38,6 +38,11 @@ _cmake_osx_sysroots() {
   _describe -t names 'name' names
 }
 
+(( $+functions[_cmake_lto_kind] )) ||
+_cmake_lto_kind() {
+  _alternative 'bools: :_cmake_bool' 'kinds:kind:(Thin thin Full full)'
+}
+
 local -a cmake_define_opts
 cmake_define_opts=(
   '-DCMAKE_BUILD_TYPE=:build type:(Debug Release RelWithDebInfo MinSizeRel)'
@@ -60,6 +65,7 @@ cmake_define_opts=(
 # TODO: It would be nice to make this pluggable in some way.
 local -a cmake_define_opts_llvm
 cmake_define_opts_llvm=(
+  '-DLLVM_BUILD_INSTRUMENTED_COVERAGE=: :_cmake_bool'
   '-DLLVM_BUILD_LLVM_C_DYLIB=: :_cmake_bool'
   '-DLLVM_BUILD_LLVM_DYLIB=: :_cmake_bool'
   '-DLLVM_BUILD_RUNTIME=: :_cmake_bool'
@@ -70,7 +76,8 @@ cmake_define_opts_llvm=(
   '-DLLVM_ENABLE_BACKTRACES=: :_cmake_bool'
   '-DLLVM_ENABLE_BOOTSTRAP=: :_cmake_bool'
   '-DLLVM_ENABLE_CRASH_OVERRIDES=: :_cmake_bool'
-  '-DLLVM_ENABLE_LTO=: :_cmake_bool'
+  '-DLLVM_ENABLE_EXTERNAL_COMPILER_RT=: :_cmake_bool'
+  '-DLLVM_ENABLE_LTO=: :_cmake_lto_kind'
   '-DLLVM_ENABLE_RTTI=: :_cmake_bool'
   '-DLLVM_ENABLE_TERMINFO=: :_cmake_bool'
   '-DLLVM_ENABLE_WERROR=: :_cmake_bool'
@@ -80,8 +87,11 @@ cmake_define_opts_llvm=(
   '-DLLVM_INCLUDE_EXAMPLES=: :_cmake_bool'
   '-DLLVM_INCLUDE_TESTS=: :_cmake_bool'
   '-DLLVM_INCLUDE_UTILS=: :_cmake_bool'
+  '-DLLVM_LIT_ARGS=:args:'
   '-DLLVM_NATIVE_BUILD=: :_files -/'
   '-DLLVM_PARALLEL_LINK_JOBS=:number:'
+  '-DLLVM_PROFILE_DATA_DIR=:directory:_files -/'
+  '-DLLVM_PROFILE_MERGE_POOL_SIZE=:number:'
   '-DLLVM_TARGETS_TO_BUILD=:targets:'
   '-DLLVM_TARGET_ARCH=:arch:'
   '-DLLVM_USE_SANITIZER=:sanitizers:'
@@ -89,6 +99,8 @@ cmake_define_opts_llvm=(
   '-DLLVM_VERSION_MAJOR=:number:'
   '-DLLVM_VERSION_MINOR=:number:'
   '-DLLVM_VERSION_PATCH=:number:'
+
+  '-DCOMPILER_RT_ENABLE_IOS=: :_cmake_bool'
 )
 
 local context line state state_descr
