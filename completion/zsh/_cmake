@@ -139,7 +139,7 @@ _arguments \
     "--system-information[Dump information about this system]:file:" \
     - '(help)' \
     {--help,--usage,-h,-H}'[Print usage information]' \
-    '--version,-version[Print version number]' \
+    {--version,-version}'[Print version number]' \
     '--help-full[Print all help manuals]' \
     '--help-manual[Print one help manual]: :_cmake_help manual' \
     '--help-manual-list[List help manuals available]' \
