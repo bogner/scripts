@@ -71,6 +71,7 @@ cmake_define_opts_llvm=(
   '-DLLVM_BUILD_RUNTIME=: :_cmake_bool'
   '-DLLVM_BUILD_TOOLS=: :_cmake_bool'
   '-DLLVM_DEFAULT_TARGET_TRIPLE=:triple:'
+  '-DLLVM_DISTRIBUTION_COMPONENTS=:components:'
   '-DLLVM_DYLIB_COMPONENTS=:components:'
   '-DLLVM_ENABLE_ASSERTIONS=: :_cmake_bool'
   '-DLLVM_ENABLE_BACKTRACES=: :_cmake_bool'
