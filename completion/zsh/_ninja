@@ -8,7 +8,7 @@ _arguments \
     -d:mode:"($(ninja -d list | awk '/^ +/ {print $1}'))" \
     -t:tool:"($(ninja -t list | awk '/^ +/ {print $1}'))" \
     '*':target:"($([ -e build.ninja ] &&
-                       ninja -t targets | awk -F: '{print $1}'))"
+                       ninja -t targets all | awk -F: '{print $1}'))"
 
 # Local Variables:
 # mode: Shell-Script
