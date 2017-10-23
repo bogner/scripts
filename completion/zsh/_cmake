@@ -111,6 +111,7 @@ _arguments \
     "-C[Preload the cache with a script]:initial-cache:_files -g \*.cmake" \
     "${cmake_define_opts[@]}" \
     "${cmake_define_opts_llvm[@]}" \
+    "*-D-:cmake opt:()" \
     "-U[Remove cache entries]:glob:" \
     "-G+[Specify a build generator]: :_cmake_generators" \
     "-T[Specify a toolset name]:toolset:" \
