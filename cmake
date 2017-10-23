@@ -22,7 +22,7 @@ if should_emit_invocation "$@"; then
     real_cmake="$(which cmake)"
     if ! [ -e cmake.command ] ||
             [[ $(tail -1 cmake.command) != "$real_cmake $@" ]]; then
-        echo "$real_cmake $@" >> cmake.command
+        echo "$real_cmake ${(q-)@}" >> cmake.command
     fi
 fi
 
