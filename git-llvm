@@ -3,6 +3,9 @@ zmodload -F zsh/stat b:zstat
 
 die () { echo "$(basename $0): $@" >&2; exit 1; }
 
+# Allow this to work even if we're outside of the llvm directory.
+[ -d llvm ] && cd llvm
+
 is_llvm_dir () { [ -d .git ] && [ -d include/llvm ]; }
 
 original_device=$(zstat +device .)
@@ -14,9 +17,16 @@ until is_llvm_dir; do
 done
 
 rc=0
-echo -n "llvm: ";
-git "$@" || : $((rc++))
-for repo in */**/.git(/:h); do
+if [ -d ../llvm ] && [ -d ../clang ]; then
+    # Side by side layout. Move up to the parent directory
+    cd ..
+else
+    # Nested layout. Handle the top level specially so we get the right name.
+    echo -n "llvm: ";
+    git "$@" || : $((rc++))
+fi
+
+for repo in */**/.git(/N:h); do
     (cd $repo; echo -n "${PWD:t}: "; git "$@") || : $((rc++))
 done
 
