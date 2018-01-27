@@ -79,6 +79,7 @@ cmake_define_opts_llvm=(
   '-DLLVM_ENABLE_CRASH_OVERRIDES=: :_cmake_bool'
   '-DLLVM_ENABLE_EXTERNAL_COMPILER_RT=: :_cmake_bool'
   '-DLLVM_ENABLE_LTO=: :_cmake_lto_kind'
+  '-DLLVM_ENABLE_PROJECTS=:projects:'
   '-DLLVM_ENABLE_RTTI=: :_cmake_bool'
   '-DLLVM_ENABLE_TERMINFO=: :_cmake_bool'
   '-DLLVM_ENABLE_WERROR=: :_cmake_bool'
