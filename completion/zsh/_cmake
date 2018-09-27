@@ -119,7 +119,7 @@ local context line state state_descr
 typeset -A opt_args
 _arguments \
     - options \
-    "-C[Preload the cache with a script]:initial-cache:_files -g \*.cmake" \
+    "*-C[Preload the cache with a script]:initial-cache:_files -g \*.cmake" \
     "${cmake_define_opts[@]}" \
     "${cmake_define_opts_llvm[@]}" \
     "*-D-:cmake opt:()" \
