@@ -6,7 +6,8 @@ die () { echo "$(basename $0): $@" >&2; exit 1; }
 # Allow this to work even if we're outside of the llvm directory.
 [ -d llvm ] && cd llvm
 
-is_llvm_dir () { [ -d .git ] && [ -d include/llvm ]; }
+is_llvm_dir () { [ -d .git ] && [ -d include/llvm ] ||
+                 [ -d ../llvm ] && [ -d ../clang ]; }
 
 original_device=$(zstat +device .)
 until is_llvm_dir; do
