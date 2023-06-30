@@ -92,6 +92,7 @@ cmake_define_opts_llvm=(
   '-DLLVM_EXTERNAL_LIBCXX_SOURCE_DIR=: :_files -/'
   '-DLLVM_EXTERNAL_LLDB_SOURCE_DIR=: :_files -/'
   '-DLLVM_EXTERNAL_LLD_SOURCE_DIR=: :_files -/'
+  '-DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=:targets:'
   '-DLLVM_INCLUDE_DOCS=: :_cmake_bool'
   '-DLLVM_INCLUDE_EXAMPLES=: :_cmake_bool'
   '-DLLVM_INCLUDE_TESTS=: :_cmake_bool'
@@ -110,6 +111,8 @@ cmake_define_opts_llvm=(
   '-DLLVM_VERSION_PATCH=:number:'
 
   '-DCOMPILER_RT_ENABLE_IOS=: :_cmake_bool'
+
+  '-DCLANG_ENABLE_HLSL=: :_cmake_bool'
 
   # TODO: Do these belong here or in the generic cmake flags?
   '-DCCACHE_PROGRAM=:path:_files -W path'
