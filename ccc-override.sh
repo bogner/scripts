@@ -27,7 +27,7 @@ Edits may be one or more of the following:
   'Ox': Removes all flags matching 'O' or 'O[sz0-9]' and adds 'Ox'
   at the end of the command line.
 
-If no edits are provided, the default is 'O0 -g'
+If no edits are provided, the default is 'O0 +-g'
 HERE
 }
 
@@ -48,7 +48,7 @@ while :; do
     *)         break;
   esac
 done
-[ -n "$CCC_OVERRIDE_OPTIONS" ] || CCC_OVERRIDE_OPTIONS="O0 -g"
+[ -n "$CCC_OVERRIDE_OPTIONS" ] || CCC_OVERRIDE_OPTIONS="O0 +-g"
 
 [ $# -gt 0 ] || die "No command provided\n\n$(help)"
 exec "$@"
