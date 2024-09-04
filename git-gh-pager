@@ -1,0 +1,43 @@
+#!/bin/sh
+# Turn references to objects in github into links.
+#
+# To use, set `git config gh-pager.project username/repository` in your clone
+# of a repo.
+#
+# This uses OSC 8 - see https://github.com/Alhadis/OSC8-Adoption
+
+# Don't mess with the output if we're piping it into something.
+[ -t 1 ] || exec less
+
+# If no repo is configured, just give up.
+project="$(git config gh-pager.project)"
+[ -n "$project" ] || exec less
+
+# Turn a URL into a link using the OSC 8 escape.
+osc8() {
+    url=$1
+    text=$2
+    echo "\e]8;;$url\e\\\\\\$text\e]8;;\e\\\\\\"
+}
+
+# Print a URL to an item in github.
+gh() {
+    project="$1"
+    path="$2"
+    item="$3"
+    text="$4"
+    [ -n "$text" ] || text="$item"
+    osc8 "https://github.com/$project/$path/$item" "$text"
+}
+
+# Use a heuristic to make sure short strings that look like hashes don't do
+# something silly - git estimates a reasonable abbreviation length of commits.
+shortlen=$(( $(git rev-parse --short HEAD | wc -c) - 1 ))
+
+# Handle commit hashes, issue/PR numbers, and cross-repo issues/PRs. Note PRs
+# just use the issue link since git will do a redirect.
+perl -p \
+     -e 's|\b[a-f0-9]{'$shortlen',40}\b|'$(gh $project commit '$&')'|g;' \
+     -e 's|(?<!\w)(?:#\|GH-)(\d+)\b|'$(gh $project issues '$1' '$&')'|g;' \
+     -e 's|\b([\w\d-]+/[\w\d-._]+)#(\d+)|'$(gh '$1' issues '$2' '$&')'|g' \
+    | less
