@@ -32,12 +32,15 @@ gh() {
 
 # Use a heuristic to make sure short strings that look like hashes don't do
 # something silly - git estimates a reasonable abbreviation length of commits.
-shortlen=$(( $(git rev-parse --short HEAD | wc -c) - 1 ))
+min=$(( $(git rev-parse --short HEAD | wc -c) - 1 ))
 
 # Handle commit hashes, issue/PR numbers, and cross-repo issues/PRs. Note PRs
 # just use the issue link since git will do a redirect.
+#
+# Note: for hashes, we treat a leading 'm' as a word boundary, this is a
+# heuristic to allow us to handle ANSI colour escapes.
 perl -p \
-     -e 's|\b[a-f0-9]{'$shortlen',40}\b|'$(gh $project commit '$&')'|g;' \
+     -e 's|((?<=m)\|\b)[a-f0-9]{'$min',40}\b|'$(gh $project commit '$&')'|g;' \
      -e 's|(?<!\w)(?:#\|GH-)(\d+)\b|'$(gh $project issues '$1' '$&')'|g;' \
      -e 's|\b([\w\d-]+/[\w\d-._]+)#(\d+)|'$(gh '$1' issues '$2' '$&')'|g' \
     | less
