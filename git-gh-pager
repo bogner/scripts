@@ -17,7 +17,7 @@ project="$(git config gh-pager.project)"
 osc8() {
     url=$1
     text=$2
-    echo "\e]8;;$url\e\\\\\\$text\e]8;;\e\\\\\\"
+    echo "\e]8;;$url\a$text\e]8;;\a"
 }
 
 # Print a URL to an item in github.
