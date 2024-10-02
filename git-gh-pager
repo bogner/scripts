@@ -1,7 +1,8 @@
 #!/bin/sh
 # Turn references to objects in github into links.
 #
-# To use, set `git config gh-pager.project username/repository` in your clone
+# To use, set `git config --global core.pager git-gh-pager` and then
+# set `git config gh-pager.project username/repository` in your clone
 # of a repo.
 #
 # This uses OSC 8 - see https://github.com/Alhadis/OSC8-Adoption
