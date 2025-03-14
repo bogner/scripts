@@ -1,0 +1,46 @@
+_ninja_submodes () {
+    ninja "$1" list | awk '/  / {print $1}'
+}
+
+_ninja () {
+    local cur prev buildfile targets
+
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev=${COMP_WORDS[COMP_CWORD-1]}
+    # TODO: override this with `-C` or `-f`
+    buildfile="${PWD}/build.ninja"
+
+    if [[ "$cur" == -* ]]; then
+        local flags='--version -v --verbose --quiet -C -f -j -k -l -n -d -t -w'
+        COMPREPLY=( $(compgen -W "$flags" -- "$cur") )
+        return;
+    fi
+
+    case $prev in
+        -C|-f)
+            COMPREPLY=( $(compgen -f -- "$cur") )
+            return
+            ;;
+        -d|-t|-w)
+            COMPREPLY=( $(compgen -W "$(_ninja_submodes $prev)" -- "$cur") )
+            return
+            ;;
+        -j|-k|-l)
+            return
+            ;;
+    esac
+
+    # Building the list of targets can be really slow - cache it based on the
+    # build directory since target changes are rare.
+    if [ -z "$_ninja_targets_cache" ] || \
+           [ "$dir" != "$_ninja_targets_cwd" ]; then
+        _ninja_targets_cache=$(
+            [ -e "$buildfile" ] && \
+                ninja -f "$buildfile" -t targets all 2>/dev/null | \
+                    awk -F': ' '{print $1}')
+        _ninja_targets_cwd="$dir"
+    fi
+
+    COMPREPLY=( $(compgen -W "$_ninja_targets_cache" -- "$cur") )
+}
+complete -F _ninja ninja ninja.exe
